@@ -728,7 +728,7 @@
   <!-- CONTROLS -->
   <div class="controls">
     <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="搜索宝可梦名称或编号…">
+      <input type="text" id="searchInput" placeholder="搜索宝可梦名称或编号">
     </div>
     <div class="type-filter" id="typeFilter">
       <button class="type-btn active" data-type="all" style="background:rgba(255,255,255,0.15);color:#fff;">全部</button>
@@ -1013,7 +1013,7 @@
 
         document.getElementById('species').textContent = genus ? genus.genus : '未知分类';
 
-        // ✅ 图鉴描述（必须放这里）
+        // 图鉴描述
         const entry = spec.flavor_text_entries.find(e => e.language.name === 'zh-Hans') ||
           spec.flavor_text_entries.find(e => e.language.name === 'en') ||
           spec.flavor_text_entries.find(e => e.language.name === 'ja');
