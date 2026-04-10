@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokemon图鉴</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --red: #e3000b;
+      --red-dark: #a50008;
+      --red-light: #ff4d55;
+      --cream: #fdf6e3;
+      --cream-dark: #f0e6c8;
+      --yellow: #ffcb05;
+      --yellow-dark: #c9a800;
+      --blue: #3b4cca;
+      --black: #1a1a2e;
+      --gray: #6b7280;
+      --white: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--black);
+      color: var(--black);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(227, 0, 11, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(59, 76, 202, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255, 203, 5, 0.08) 0%, transparent 70%),
+        #1a1a2e;
+      z-index: -2;
+    }
+
+    /* dot grid */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 28px 28px;
+      z-index: -1;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      text-align: center;
+      padding: 52px 20px 32px;
+      position: relative;
+    }
+
+    .pokeball-deco {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 20px;
+      position: relative;
+      animation: spin-slow 8s linear infinite;
+    }
+
+    .pokeball-deco svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 18px rgba(227, 0, 11, 0.5));
+    }
+
+    @keyframes spin-slow {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(13px, 3vw, 22px);
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-shadow: none;
+      line-height: 1.6;
+    }
+
+    h1 span {
+      display: block;
+      font-size: 0.55em;
+      color: rgba(255, 255, 255, 0.55);
+      margin-top: 8px;
+      letter-spacing: 4px;
+    }
+
+    /* ─── CONTROLS ─── */
+    .controls {
+      max-width: 1100px;
+      margin: 0 auto 36px;
+      padding: 0 24px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+      max-width: 380px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border-radius: 50px;
+      border: 2px solid rgba(255, 203, 5, 0.3);
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .search-wrap input::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--yellow);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .search-wrap::before {
+      content: '🔍';
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+    }
+
+    .type-filter {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .type-btn {
+      padding: 7px 14px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      opacity: 0.75;
+    }
+
+    .type-btn:hover,
+    .type-btn.active {
+      transform: scale(1.08);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      opacity: 1;
+    }
+
+    .type-btn.active {
+      outline: 2px solid var(--yellow);
+      outline-offset: 2px;
+    }
+
+    /* ─── COUNTER ─── */
+    .counter {
+      text-align: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 28px;
+      letter-spacing: 1px;
+    }
+
+    /* ─── GRID ─── */
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 18px;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 18px 14px 14px;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(.34, 1.56, .64, 1), box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+      animation: card-in 0.4s both;
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes card-in {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 60%);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: rgba(0, 0, 0, 0.25);
+      text-align: right;
+      margin-bottom: 6px;
+    }
+
+    .card-img-wrap {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .card-img-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px dashed rgba(0, 0, 0, 0.08);
+    }
+
+    .card-img-wrap img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      transition: transform 0.3s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .card:hover .card-img-wrap img {
+      transform: scale(1.15) translateY(-3px);
+    }
+
+    .card-name {
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #222;
+      margin-bottom: 4px;
+    }
+
+    .card-name-en {
+      text-align: center;
+      font-size: 11px;
+      color: var(--gray);
+      margin-bottom: 10px;
+      text-transform: capitalize;
+    }
+
+    .type-tags {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .type-tag {
+      padding: 3px 9px;
+      border-radius: 50px;
+      font-size: 11px;
+      color: #fff;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ─── LOADING ─── */
+    .loading-wrap {
+      text-align: center;
+      padding: 80px 20px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .pokeball-spin {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 20px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-wrap p {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .load-more-wrap {
+      text-align: center;
+      padding: 10px 0 60px;
+    }
+
+    .load-more-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      padding: 14px 28px;
+      background: var(--yellow);
+      color: var(--black);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 0 var(--yellow-dark);
+    }
+
+    .load-more-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--yellow-dark);
+    }
+
+    .load-more-btn:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 30, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--cream);
+      border-radius: 28px;
+      width: 100%;
+      max-width: 460px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: scale(0.88) translateY(20px);
+      transition: transform 0.3s cubic-bezier(.34, 1.56, .64, 1);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-overlay.open .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      border-radius: 28px 28px 0 0;
+      padding: 28px 28px 20px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .modal-img-wrap {
+      width: 110px;
+      height: 110px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .modal-img-wrap img {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+
+    .modal-title-block {
+      flex: 1;
+    }
+
+    .modal-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 6px;
+    }
+
+    .modal-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      margin-bottom: 4px;
+    }
+
+    .modal-name-en {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: capitalize;
+      margin-bottom: 10px;
+    }
+
+    .modal-types {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 34px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .modal-body {
+      padding: 24px 28px 28px;
+    }
+
+    .modal-section {
+      margin-bottom: 22px;
+    }
+
+    .modal-section-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--gray);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-item {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      color: var(--gray);
+      margin-bottom: 3px;
+    }
+
+    .info-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    /* stat bars */
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .stat-name {
+      font-size: 11px;
+      color: var(--gray);
+      width: 70px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .stat-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #333;
+      width: 32px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .stat-bar-bg {
+      flex: 1;
+      height: 8px;
+      border-radius: 50px;
+      background: rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .stat-bar {
+      height: 100%;
+      border-radius: 50px;
+      transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+      width: 0;
+    }
+
+    .modal-desc {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #444;
+    }
+
+    /* ─── TYPE COLORS ─── */
+    .type-normal {
+      background: #A8A878;
+    }
+
+    .type-fire {
+      background: #F08030;
+    }
+
+    .type-water {
+      background: #6890F0;
+    }
+
+    .type-electric {
+      background: #F8D030;
+      color: #333 !important;
+      text-shadow: none !important;
+    }
+
+    .type-grass {
+      background: #78C850;
+    }
+
+    .type-ice {
+      background: #98D8D8;
+      color: #333 !important;
+      text-shadow: none !important;
+    }
+
+    .type-fighting {
+      background: #C03028;
+    }
+
+    .type-poison {
+      background: #A040A0;
+    }
+
+    .type-ground {
+      background: #E0C068;
+      color: #333 !important;
+      text-shadow: none !important;
+    }
+
+    .type-flying {
+      background: #A890F0;
+    }
+
+    .type-psychic {
+      background: #F85888;
+    }
+
+    .type-bug {
+      background: #A8B820;
+    }
+
+    .type-rock {
+      background: #B8A038;
+    }
+
+    .type-ghost {
+      background: #705898;
+    }
+
+    .type-dragon {
+      background: #7038F8;
+    }
+
+    .type-dark {
+      background: #705848;
+    }
+
+    .type-steel {
+      background: #B8B8D0;
+      color: #333 !important;
+      text-shadow: none !important;
+    }
+
+    .type-fairy {
+      background: #EE99AC;
+      color: #333 !important;
+      text-shadow: none !important;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+
+    /* ─── NO RESULTS ─── */
+    .no-results {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .no-results .emoji {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .no-results p {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="pokeball-deco">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#fff" stroke="#333" stroke-width="4" />
+        <path d="M2 50 Q50 50 98 50" stroke="#333" stroke-width="4" fill="none" />
+        <path d="M2 50 A48 48 0 0 1 98 50" fill="#e3000b" />
+        <circle cx="50" cy="50" r="14" fill="#fff" stroke="#333" stroke-width="4" />
+        <circle cx="50" cy="50" r="7" fill="#f5f5f5" stroke="#333" stroke-width="2" />
+      </svg>
+    </div>
+    <h1>宝可梦图鉴<span>POKEMON · Gen 1</span></h1>
+  </header>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="搜索宝可梦名称或编号…">
+    </div>
+    <div class="type-filter" id="typeFilter">
+      <button class="type-btn active" data-type="all" style="background:rgba(255,255,255,0.15);color:#fff;">全部</button>
+    </div>
+  </div>
+
+  <!-- COUNTER -->
+  <div class="counter" id="counter">— / — 只宝可梦</div>
+
+  <!-- GRID -->
+  <div class="grid" id="grid">
+    <div class="loading-wrap" style="grid-column:1/-1">
+      <svg class="pokeball-spin" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="#fff" stroke="#555" stroke-width="4" />
+        <path d="M2 50 A48 48 0 0 1 98 50" fill="#e3000b" />
+        <line x1="2" y1="50" x2="98" y2="50" stroke="#555" stroke-width="4" />
+        <circle cx="50" cy="50" r="14" fill="#fff" stroke="#555" stroke-width="4" />
+      </svg>
+      <p>LOADING…</p>
+    </div>
+  </div>
+  <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+    <button class="load-more-btn" id="loadMoreBtn">LOAD MORE ▼</button>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header" id="modalHeader">
+        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+        <div class="modal-img-wrap"><img id="modalImg" src="" alt=""></div>
+        <div class="modal-title-block">
+          <div class="modal-number" id="modalNumber"></div>
+          <div class="modal-name" id="modalName"></div>
+          <div class="modal-name-en" id="modalNameEn"></div>
+          <div class="modal-types" id="modalTypes"></div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <div class="modal-section-title">基础信息</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">身高</div>
+              <div class="info-val" id="modalHeight">—</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">体重</div>
+              <div class="info-val" id="modalWeight">—</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">分类</div>
+              <div class="info-val" id="species">—</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">特性</div>
+              <div class="info-val" id="modalAbility">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">基础种族值</div>
+          <div id="modalStats"></div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">图鉴描述</div>
+          <div class="modal-desc" id="modalDesc">加载中…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── CONFIG ───────────────────────────────────────────────────────────────────
+    const TOTAL = 151;          // Gen 1
+    const PAGE_SIZE = 30;
+
+    // Chinese name map (Gen 1 key ones)
+    const ZH_NAMES = { "bulbasaur": "妙蛙种子", "ivysaur": "妙蛙草", "venusaur": "妙蛙花", "charmander": "小火龙", "charmeleon": "火恐龙", "charizard": "喷火龙", "squirtle": "杰尼龟", "wartortle": "卡咪龟", "blastoise": "水箭龟", "caterpie": "绿毛虫", "metapod": "铁甲蛹", "butterfree": "巴大蝶", "weedle": "独角虫", "kakuna": "铁壳蛹", "beedrill": "大针蜂", "pidgey": "波波", "pidgeotto": "比比鸟", "pidgeot": "大比鸟", "rattata": "小拉达", "raticate": "拉达", "spearow": "嘎啦嘎啦", "fearow": "大嘴雀", "ekans": "阿柏蛇", "arbok": "阿柏怪", "pikachu": "皮卡丘", "raichu": "雷丘", "sandshrew": "穿山鼠", "sandslash": "穿山王", "nidoran-f": "尼多兰", "nidorina": "尼多娜", "nidoqueen": "尼多后", "nidoran-m": "尼多郎", "nidorino": "尼多力诺", "nidoking": "尼多王", "clefairy": "皮皮", "clefable": "皮可西", "vulpix": "六尾", "ninetales": "九尾", "jigglypuff": "胖丁", "wigglytuff": "胖可丁", "zubat": "超音蝠", "golbat": "大嘴蝠", "oddish": "走路草", "gloom": "臭臭花", "vileplume": "臭花王", "paras": "派拉斯", "parasect": "派拉斯特", "venonat": "毛球", "venomoth": "摩鲁蛾", "diglett": "地鼠", "dugtrio": "三地鼠", "meowth": "喵喵", "persian": "猫老大", "psyduck": "可达鸭", "golduck": "哥达鸭", "mankey": "猴怪", "primeape": "火暴猴", "growlithe": "卡蒂狗", "arcanine": "风速狗", "poliwag": "蚊香蝌蚪", "poliwhirl": "蚊香君", "poliwrath": "蚊香泳士", "abra": "凯西", "kadabra": "勇基拉", "alakazam": "胡地", "machop": "腕力", "machoke": "豪力", "machamp": "怪力", "bellsprout": "喇叭芽", "weepinbell": "口呆花", "victreebel": "大食花", "tentacool": "玛瑙水母", "tentacruel": "毒刺水母", "geodude": "小拳石", "graveler": "隆隆石", "golem": "隆隆岩", "ponyta": "小火马", "rapidash": "烈火马", "slowpoke": "呆呆兽", "slowbro": "呆壳兽", "magnemite": "小磁怪", "magneton": "三磁怪", "farfetchd": "大葱鸭", "doduo": "嘟嘟", "dodrio": "嘟嘟利", "seel": "小海狮", "dewgong": "白海狮", "grimer": "臭泥", "muk": "臭臭泥", "shellder": "大舌贝", "cloyster": "刺甲贝", "gastly": "鬼斯", "haunter": "鬼斯通", "gengar": "耿鬼", "onix": "大岩蛇", "drowzee": "催眠貘", "hypno": "引梦貘人", "krabby": "大钳蟹", "kingler": "巨钳蟹", "voltorb": "霹雳球", "electrode": "顿甲", "exeggcute": "蛋蛋", "exeggutor": "椰蛋树", "cubone": "卡拉卡拉", "marowak": "嘎啦嘎啦", "hitmonlee": "飞腿郎", "hitmonchan": "快拳郎", "lickitung": "吞吞", "koffing": "瓦斯弹", "weezing": "双弹瓦斯", "rhyhorn": "独角犀牛", "rhydon": "钻角犀兽", "chansey": "幸福蛋", "tangela": "蔓藤怪", "kangaskhan": "袋兽", "horsea": "墨海马", "seadra": "海刺龙", "goldeen": "角金鱼", "seaking": "金鱼王", "staryu": "海星星", "starmie": "宝石海星", "mr-mime": "魔墙人偶", "scyther": "飞天螳螂", "jynx": "迷唇娃", "electabuzz": "电击怪", "magmar": "鸭嘴火兽", "pinsir": "凿齿虫", "tauros": "肯泰罗", "magikarp": "鲤鱼王", "gyarados": "暴鲤龙", "lapras": "拉普拉斯", "ditto": "百变怪", "eevee": "伊布", "vaporeon": "水伊布", "jolteon": "雷伊布", "flareon": "火伊布", "porygon": "多边兽", "omanyte": "菊石兽", "omastar": "多刺菊石兽", "kabuto": "化石盔", "kabutops": "镰刀盔", "aerodactyl": "化石翼龙", "snorlax": "卡比兽", "articuno": "急冻鸟", "zapdos": "闪电鸟", "moltres": "火焰鸟", "dratini": "迷你龙", "dragonair": "哈克龙", "dragonite": "快龙", "mewtwo": "超梦", "mew": "梦幻" };
+
+    // Type Chinese
+    const TYPE_ZH = { normal: "一般", fire: "火", water: "水", electric: "电", grass: "草", ice: "冰", fighting: "格斗", poison: "毒", ground: "地面", flying: "飞行", psychic: "超能力", bug: "虫", rock: "岩石", ghost: "幽灵", dragon: "龙", dark: "恶", steel: "钢", fairy: "妖精" };
+
+    // Stat Chinese
+    const STAT_ZH = { "hp": "HP", "attack": "攻击", "defense": "防御", "special-attack": "特攻", "special-defense": "特防", "speed": "速度" };
+
+    // Stat colors
+    const STAT_COLORS = { "hp": "#ff5959", "attack": "#f5ac78", "defense": "#fae078", "special-attack": "#9db7f5", "special-defense": "#a7db8d", "speed": "#fa92b2" };
+
+    // ─── STATE ────────────────────────────────────────────────────────────────────
+    let allPokemon = [];   // full list {id, name, types, imgUrl, zhName}
+    let filtered = [];   // after search/filter
+    let displayed = 0;
+    let activeType = []; // active types
+    let searchQ = '';
+    let typesFound = new Set();
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────────
+    async function init() {
+      const ids = Array.from({ length: TOTAL }, (_, i) => i + 1);
+      const results = await Promise.allSettled(
+        ids.map(id => fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(r => r.json()))
+      );
+      allPokemon = results
+        .filter(r => r.status === 'fulfilled')
+        .map(r => {
+          const p = r.value;
+          const name = p.name;
+          const zhName = ZH_NAMES[name] || name;
+          const types = p.types.map(t => t.type.name);
+          types.forEach(t => typesFound.add(t));
+          return {
+            id: p.id,
+            name,
+            zhName,
+            types,
+            imgUrl: p.sprites.other['official-artwork'].front_default || p.sprites.front_default,
+            height: (p.height / 10).toFixed(1) + ' m',
+            weight: (p.weight / 10).toFixed(1) + ' kg',
+            baseExp: p.base_experience,
+            ability: p.abilities[0]?.ability.name || '—',
+            stats: p.stats.map(s => ({ name: s.stat.name, value: s.base_stat }))
+          };
+        });
+
+      buildTypeButtons();
+      applyFilters();
+    }
+
+    // ─── TYPE BUTTONS ─────────────────────────────────────────────────────────────
+    function buildTypeButtons() {
+      const wrap = document.getElementById('typeFilter');
+      [...typesFound].sort().forEach(type => {
+        const btn = document.createElement('button');
+        btn.className = `type-btn type-${type}`;
+        btn.dataset.type = type;
+        btn.textContent = TYPE_ZH[type] || type;
+        btn.style.color = ['electric', 'ice', 'ground', 'steel', 'fairy'].includes(type) ? '#333' : '#fff';
+        btn.onclick = () => {
+          const index = activeType.indexOf(type);
+          if (index > -1) {
+            // 已选 -> 取消
+            activeType.splice(index, 1);
+            btn.classList.remove('active');
+          } else {
+            // 未选 -> 添加
+            activeType.push(type);
+            btn.classList.add('active');
+          }
+          applyFilters();
+        };
+        wrap.appendChild(btn);
+      });
+      // All btn
+      document.querySelector('[data-type="all"]').onclick = () => {
+        activeType = [];
+        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-type="all"]').classList.add('active');
+        applyFilters();
+      };
+    }
+
+    // ─── FILTER + RENDER ──────────────────────────────────────────────────────────
+    function applyFilters() {
+      filtered = allPokemon.filter(p => {
+        const matchType = activeType.length === 0 || activeType.every(t => p.types.includes(t));
+        const q = searchQ.toLowerCase();
+        const matchQ = !q || p.zhName.includes(q) || p.name.includes(q) || String(p.id).includes(q);
+        return matchType && matchQ;
+      });
+      displayed = 0;
+      document.getElementById('grid').innerHTML = '';
+      renderPage();
+    }
+
+    function renderPage() {
+      const grid = document.getElementById('grid');
+      const slice = filtered.slice(displayed, displayed + PAGE_SIZE);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="no-results"><div class="emoji">😵</div><p>没有找到匹配的宝可梦</p></div>`;
+        document.getElementById('loadMoreWrap').style.display = 'none';
+        document.getElementById('counter').textContent = `找到 0 只宝可梦`;
+        return;
+      }
+
+      slice.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = (i * 0.04) + 's';
+        const bgType = p.types[0];
+        const bgClass = `type-${bgType}`;
+        const typeTagsHtml = p.types.map(t =>
+          `<span class="type-tag type-${t}">${TYPE_ZH[t] || t}</span>`
+        ).join('');
+
+        // img bg tint
+        const typeColors = { normal: '#c8c8a8', fire: '#f8c098', water: '#a8c8f8', electric: '#f8e878', grass: '#a8d890', ice: '#b8e8e8', fighting: '#e09878', poison: '#d098d0', ground: '#e8d898', flying: '#c8b8f8', psychic: '#f8a8c8', bug: '#c8d060', rock: '#d8c870', ghost: '#b098c8', dragon: '#c098f8', dark: '#b09878', steel: '#d0d0e8', fairy: '#f0c8d8' };
+        const imgBg = typeColors[bgType] || '#e0e0e0';
+
+        card.innerHTML = `
+      <div class="card-number">#${String(p.id).padStart(3, '0')}</div>
+      <div class="card-img-wrap" style="background:${imgBg}40">
+        <img src="${p.imgUrl}" alt="${p.zhName}" loading="lazy">
+      </div>
+      <div class="card-name">${p.zhName}</div>
+      <div class="card-name-en">${p.name}</div>
+      <div class="type-tags">${typeTagsHtml}</div>
+    `;
+        card.onclick = () => openModal(p);
+        grid.appendChild(card);
+      });
+
+      displayed += slice.length;
+      document.getElementById('counter').textContent = `展示 ${displayed} / ${filtered.length} 只宝可梦，本项目仅用于学习与课程作业展示，所有宝可梦相关内容版权归任天堂及The Pokémon Company所有。`;
+      document.getElementById('loadMoreWrap').style.display = displayed < filtered.length ? 'block' : 'none';
+    }
+
+    document.getElementById('loadMoreBtn').onclick = renderPage;
+    document.getElementById('searchInput').addEventListener('input', e => {
+      searchQ = e.target.value;
+      applyFilters();
+    });
+
+    // ─── MODAL ────────────────────────────────────────────────────────────────────
+    const TYPE_COLORS_HEX = { normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030', grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0', ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820', rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848', steel: '#B8B8D0', fairy: '#EE99AC' };
+
+    async function openModal(p) {
+      // Header color
+      const c1 = TYPE_COLORS_HEX[p.types[0]] || '#888';
+      const c2 = p.types[1] ? TYPE_COLORS_HEX[p.types[1]] : c1;
+
+      document.getElementById('modalHeader').style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+      document.getElementById('modalImg').src = p.imgUrl;
+      document.getElementById('modalImg').alt = p.zhName;
+      document.getElementById('modalNumber').textContent = `#${String(p.id).padStart(3, '0')}`;
+      document.getElementById('modalName').textContent = p.zhName;
+      document.getElementById('modalNameEn').textContent = p.name;
+      document.getElementById('modalHeight').textContent = p.height;
+      document.getElementById('modalWeight').textContent = p.weight;
+      document.getElementById('modalAbility').textContent = p.ability;
+      document.getElementById('modalTypes').innerHTML = p.types.map(t =>
+        `<span class="type-tag type-${t}">${TYPE_ZH[t] || t}</span>`
+      ).join('');
+
+      // Stats
+      const statsDiv = document.getElementById('modalStats');
+      statsDiv.innerHTML = '';
+      p.stats.forEach(s => {
+        const pct = Math.min(s.value / 255 * 100, 100);
+        const color = STAT_COLORS[s.name] || '#aaa';
+        statsDiv.innerHTML += `
+      <div class="stat-row">
+        <div class="stat-name">${STAT_ZH[s.name] || s.name}</div>
+        <div class="stat-val">${s.value}</div>
+        <div class="stat-bar-bg">
+          <div class="stat-bar" data-pct="${pct}" style="background:${color}; width:0%"></div>
+        </div>
+      </div>`;
+      });
+
+      document.getElementById('modalDesc').textContent = '加载图鉴描述中…';
+
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      // Animate bars
+      setTimeout(() => {
+        document.querySelectorAll('.stat-bar').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%';
+        });
+      }, 100);
+
+      // Fetch description
+      try {
+        const spec = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${p.id}`).then(r => r.json());
+
+        // 分类
+        const genus = spec.genera.find(g => g.language.name === 'zh-CN') ||
+          spec.genera.find(g => g.language.name === 'en') ||
+          spec.genera.find(g => g.language.name === 'ja');
+
+        document.getElementById('species').textContent = genus ? genus.genus : '未知分类';
+
+        // ✅ 图鉴描述（必须放这里）
+        const entry = spec.flavor_text_entries.find(e => e.language.name === 'zh-Hans') ||
+          spec.flavor_text_entries.find(e => e.language.name === 'en') ||
+          spec.flavor_text_entries.find(e => e.language.name === 'ja');
+
+        const text = entry ? entry.flavor_text.replace(/[\n\f]/g, ' ') : '暂无图鉴描述。';
+        document.getElementById('modalDesc').textContent = text;
+
+      } catch {
+        document.getElementById('species').textContent = '加载失败';
+        document.getElementById('modalDesc').textContent = '无法加载图鉴描述。';
+      }
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+    }
+    function closeModalDirect() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+
+    // ─── START ────────────────────────────────────────────────────────────────────
+    init();
+  </script>
+</body>
+
+</html>
